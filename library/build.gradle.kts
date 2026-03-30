@@ -13,10 +13,13 @@ plugins {
     alias(libs.plugins.dokka)
 }
 
+version = project.property("VERSION_NAME") as String
+group = "io.techie.kameleoon"
+
 kotlin {
     androidTarget {
-        // Publish both release and debug variants of the Android library
-        publishLibraryVariants("release", "debug")
+        // Publish only release variant
+        publishLibraryVariants("release")
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
@@ -31,6 +34,8 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "Kameleoon"
             isStatic = true
+            // Explicitly set bundle ID to avoid warnings and potential build issues
+            freeCompilerArgs += listOf("-Xbinary=bundleId=io.techie.kameleoon")
         }
     }
 
@@ -71,14 +76,12 @@ android {
 
 // Maven Publish Configuration
 mavenPublishing {
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
-    signAllPublications()
-    
     coordinates(
         groupId = "io.techie.kameleoon",
         artifactId = "library",
-        version = "1.0.0"
     )
+    publishToMavenCentral(automaticRelease = false)
+    signAllPublications()
 
     pom {
         name.set("Kameleoon")

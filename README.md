@@ -101,9 +101,63 @@ Or run individual checks:
 
 ## 📦 Publishing
 
-Publishing to Maven Central is handled by the [Vanniktech Maven Publish Plugin](https://github.com/vanniktech/gradle-maven-publish-plugin).
+Kameleoon is pre-configured to publish to **Maven Central** (Sonatype) using the [Vanniktech Maven Publish Plugin](https://github.com/vanniktech/gradle-maven-publish-plugin).
+
+### 1. Manual Publishing (Local)
+For local testing or manual publishing:
 1.  Configure your Sonatype (OSSRH) credentials in `local.properties` or environment variables.
-2.  Run the publish task or use the GitHub Action workflow `.github/workflows/publish.yml`.
+2.  Run the publish task:
+    ```shell
+    ./gradlew publishToMavenCentral --no-configuration-cache
+    ```
+
+### 2. Automated Publishing (GitHub Actions)
+The template includes a robust GitHub Action ([`publish.yml`](.github/workflows/publish.yml)) that is **tag-driven**. 
+
+#### How it works:
+*   Creating a **GitHub Release** with a tag like `v1.0.0-beta01` triggers the workflow.
+*   The workflow automatically strips the `v` prefix and publishes version `1.0.0-beta01` to Maven Central.
+*   This ensures your Git tags follow SemVer (with `v`) while your Maven artifacts follow Maven conventions (no `v`).
+
+#### Required GitHub Secrets:
+To use the automated workflow, you **MUST** configure the following [Repository Secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions) in your GitHub repository:
+
+| Secret Name | Description |
+| :--- | :--- |
+| `MAVEN_CENTRAL_USERNAME` | Your Sonatype/Maven Central username. |
+| `MAVEN_CENTRAL_PASSWORD` | Your Sonatype/Maven Central password. |
+| `SIGNING_KEY` | Your **Base64 encoded** GPG private key. |
+| `SIGNING_KEY_ID` | The last 8 characters of your GPG key ID. |
+| `SIGNING_PASSWORD` | The passphrase for your GPG key. |
+
+#### 🔑 How to Prepare GPG Keys
+1.  **Generate a new key** (if you don't have one):
+    ```shell
+    gpg --full-generate-key
+    ```
+    *(Choose RSA/RSA 4096, and set a passphrase)*.
+
+2.  **Get your Key ID**:
+    ```shell
+    gpg --list-secret-keys --keyid-format LONG
+    ```
+    Look for a line like: `sec rsa4096/ABCDEF1234567890`. Your ID is the last 8 characters: `34567890`.
+
+3.  **Export and Encode to Base64**:
+    ```shell
+    gpg --export-secret-keys <YOUR_KEY_ID> | base64
+    ```
+    Copy the long string output and save it as `SIGNING_KEY` in GitHub Secrets.
+
+4.  **Publish your Public Key** (Maven Central Needs this):
+    ```shell
+    gpg --keyserver keyserver.ubuntu.com --send-keys <YOUR_KEY_ID>
+    ```
+
+> [!TIP]
+> You can also use other keyservers like `keys.openpgp.org` or `pgp.mit.edu`.
+
+---
 
 ## 🤝 Contributing
 
