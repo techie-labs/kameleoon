@@ -63,3 +63,14 @@ subprojects {
         buildUponDefaultConfig = true
     }
 }
+
+// Custom task for project rebranding
+tasks.register("rebrand") {
+    group = "setup"
+    description = "Automates project rebranding by running the rebrand.sh script."
+    doLast {
+        exec {
+            commandLine("bash", "scripts/rebrand.sh")
+        }
+    }
+}
