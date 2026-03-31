@@ -59,11 +59,18 @@ Run the setup script to prepare your local environment (creates `local.propertie
 ./scripts/setup.sh
 ```
 
-### 2. Rename and Configure
-Update `library/build.gradle.kts` with your library's identity:
-*   `mavenPublishing` block: Update `groupId`, `artifactId`, `version`.
-*   `pom` block: Update licenses, developers, and SCM links.
-*   `android` block: Update `namespace`.
+### 2. Rename and Configure (Automated)
+
+The template includes an automated tool to rebrand the project with your chosen identity. Run it to update project name, package name, and metadata:
+
+```shell
+./gradlew rebrand
+```
+
+Follow the interactive prompts to set your **Project Name**, **Package Name**, **Repository URL**, and **Developer Info**. This tool will refactor the entire codebase, including directory structures and package statements.
+
+> [!TIP]
+> You can also run the script directly: `./scripts/rebrand.sh`.
 
 ### 3. Build and Run Sample
 
