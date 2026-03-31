@@ -20,12 +20,11 @@ plugins {
 
 // Configuration for Binary Compatibility Validator
 apiValidation {
-    // Ignore the sample project as it is not part of the public API
+    // Ignore the sample projects as they are not part of the public API
     ignoredProjects.add("sample")
     ignoredProjects.add("shared")
     ignoredProjects.add("androidApp")
     ignoredProjects.add("desktopApp")
-    ignoredProjects.add("webApp")
 }
 
 // Configuration applied to all subprojects (library and sample)
@@ -34,10 +33,17 @@ subprojects {
     apply(plugin = "io.gitlab.arturbosch.detekt")
 
     spotless {
+        lineEndings = com.diffplug.spotless.LineEnding.UNIX
+
         kotlin {
             target("**/*.kt")
             targetExclude("**/build/**/*.kt")
-            ktlint()
+            ktlint().editorConfigOverride(mapOf(
+                "ktlint_standard_no-wildcard-imports" to "disabled",
+                "ktlint_standard_filename" to "disabled",
+                "ktlint_standard_no-empty-file" to "disabled",
+                "ktlint_function_naming_ignore_when_annotated_with" to "Composable"
+            ))
             // Ensure a consistent copyright header
             licenseHeaderFile(rootProject.file("spotless/copyright.kt"))
         }

@@ -1,0 +1,14 @@
+public final class io/techie/kameleoon/JVMPlatform : io/techie/kameleoon/Platform {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun getName ()Ljava/lang/String;
+}
+
+public abstract interface class io/techie/kameleoon/Platform {
+	public abstract fun getName ()Ljava/lang/String;
+}
+
+public final class io/techie/kameleoon/Platform_jvmKt {
+	public static final fun getPlatform ()Lio/techie/kameleoon/Platform;
+}
+

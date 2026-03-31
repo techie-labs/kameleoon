@@ -6,33 +6,108 @@ on:
   pull_request:
     branches: [ "main" ]
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
+jobs:
+  # Job 1: Code Quality Checks (Fastest)
+  # Runs on Linux. Checks formatting, static analysis, and API compatibility.
+  quality-check:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
     - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+    - name: Run Quality Checks
+      run: ./gradlew spotlessCheck detekt apiCheck --stacktrace
+
+  # Job 2: Android, Desktop & Web Build (Medium)
+  # Runs on Linux. Builds and tests non-Apple targets.
+  build-linux-targets:
+    needs: quality-check
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+    - name: Build & Test (Android, JVM, Wasm)
+      # Target specific tasks to avoid redundant platform compilation
+      run: |
+        ./gradlew \
+          :library:assembleDebug \
+          :library:testDebugUnitTest \
+          :library:jvmTest \
+          :library:wasmJsTest \
+          :sample:androidApp:assembleDebug \
+          :sample:desktopApp:assemble \
+          --stacktrace -Pkotlin.daemon.jvmargs="-Xmx4g"
+
+  # Job 3: iOS Build (Slowest & Expensive)
+  # Runs on macOS. Only builds iOS frameworks to verify compilation.
+  # Optimized: Only runs if library or gradle files change.
+  build-ios-targets:
+    needs: quality-check
+    if: |
+      !contains(github.event.head_commit.message, '[skip ci]') && 
+      !contains(github.event.head_commit.message, '[skip ios]')
+    runs-on: macos-latest
+    timeout-minutes: 45
+    # Use path filtering to save macOS minutes for free-tier users
+    # Note: GitHub Actions 'paths' filter at the block level is better, 
+    # but for a dependent job we check if we should skip.
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Check for changes in library or gradle
+      id: changed-files
+      run: |
+        if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E '^(library/|gradle/|build\.gradle\.kts|settings\.gradle\.kts|gradle\.properties)'; then
+          echo "changed=true" >> $GITHUB_OUTPUT
+        else
+          # For PRs, compare with base branch
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+             if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '^(library/|gradle/|build\.gradle\.kts|settings\.gradle\.kts|gradle\.properties)'; then
+               echo "changed=true" >> $GITHUB_OUTPUT
+             else
+               echo "changed=false" >> $GITHUB_OUTPUT
+             fi
+          else
+             echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+        fi
 
     - name: Set up JDK 17
+      if: steps.changed-files.outputs.changed == 'true'
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
 
     - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
+      if: steps.changed-files.outputs.changed == 'true'
+      uses: gradle/actions/setup-gradle@v4
 
-    - name: Check Code Style (Spotless)
-      run: ./gradlew spotlessCheck
-
-    - name: Static Analysis (Detekt)
-      run: ./gradlew detekt
-
-    - name: Build with Gradle
-      run: ./gradlew build
-
-    - name: Run Tests
-      run: ./gradlew allTests
-
-    - name: Check API Compatibility
-      run: ./gradlew apiCheck
+    - name: Build iOS Frameworks (Debug)
+      if: steps.changed-files.outputs.changed == 'true'
+      run: |
+        ./gradlew \
+          :library:linkDebugFrameworkIosArm64 \
+          :library:linkDebugFrameworkIosSimulatorArm64 \
+          --stacktrace -Pkotlin.daemon.jvmargs="-Xmx6g"

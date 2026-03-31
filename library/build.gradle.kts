@@ -1,8 +1,7 @@
 @file:OptIn(ExperimentalWasmDsl::class)
 
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -15,6 +14,45 @@ plugins {
 
 version = project.property("VERSION_NAME") as String
 group = "io.techie.kameleoon"
+
+// Maven Publish Configuration
+mavenPublishing {
+    coordinates(
+        groupId = "io.techie.kameleoon",
+        artifactId = "library",
+    )
+    publishToMavenCentral(automaticRelease = false)
+    signAllPublications()
+
+    pom {
+        name.set("Kameleoon")
+        description.set("An adaptive template for Compose Multiplatform Library")
+        inceptionYear.set("2024")
+        url.set("https://github.com/yourusername/kameleoon")
+
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                distribution.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
+
+        developers {
+            developer {
+                id.set("yourusername")
+                name.set("Your Name")
+                url.set("https://github.com/yourusername")
+            }
+        }
+
+        scm {
+            url.set("https://github.com/yourusername/kameleoon")
+            connection.set("scm:git:git://github.com/yourusername/kameleoon.git")
+            developerConnection.set("scm:git:ssh://git@github.com/yourusername/kameleoon.git")
+        }
+    }
+}
 
 kotlin {
     androidTarget {
@@ -29,7 +67,7 @@ kotlin {
     listOf(
         iosX64(),
         iosArm64(),
-        iosSimulatorArm64()
+        iosSimulatorArm64(),
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "Kameleoon"
@@ -52,6 +90,7 @@ kotlin {
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
+            implementation(libs.material.icons.extended)
             implementation(libs.compose.ui)
             implementation(libs.compose.components.resources)
         }
@@ -71,44 +110,5 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-}
-
-// Maven Publish Configuration
-mavenPublishing {
-    coordinates(
-        groupId = "io.techie.kameleoon",
-        artifactId = "library",
-    )
-    publishToMavenCentral(automaticRelease = false)
-    signAllPublications()
-
-    pom {
-        name.set("Kameleoon")
-        description.set("An adaptive template for Compose Multiplatform Library")
-        inceptionYear.set("2024")
-        url.set("https://github.com/yourusername/kameleoon")
-        
-        licenses {
-            license {
-                name.set("The Apache License, Version 2.0")
-                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                distribution.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-            }
-        }
-        
-        developers {
-            developer {
-                id.set("yourusername")
-                name.set("Your Name")
-                url.set("https://github.com/yourusername")
-            }
-        }
-        
-        scm {
-            url.set("https://github.com/yourusername/kameleoon")
-            connection.set("scm:git:git://github.com/yourusername/kameleoon.git")
-            developerConnection.set("scm:git:ssh://git@github.com/yourusername/kameleoon.git")
-        }
     }
 }

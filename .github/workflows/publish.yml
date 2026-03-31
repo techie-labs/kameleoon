@@ -9,7 +9,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -18,7 +18,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Decode GPG Key
         run: |
@@ -29,6 +29,7 @@ jobs:
           rm /tmp/signing_key.gpg
 
       - name: Publish to Maven Central
+        # No configuration cache for publishing to ensure signing works correctly
         run: ./gradlew publishToMavenCentral --no-configuration-cache -PVERSION_NAME=${GITHUB_REF_NAME#v}
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
