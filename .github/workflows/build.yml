@@ -25,7 +25,7 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v4
+      uses: gradle/actions/setup-gradle@v6
     - name: Run Quality Checks
       run: ./gradlew spotlessCheck detekt apiCheck --stacktrace
 
@@ -44,7 +44,7 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v4
+      uses: gradle/actions/setup-gradle@v6
     - name: Build & Test (Android, JVM, Wasm)
       # Target specific tasks to avoid redundant platform compilation
       run: |
@@ -102,7 +102,7 @@ jobs:
 
     - name: Setup Gradle
       if: steps.changed-files.outputs.changed == 'true'
-      uses: gradle/actions/setup-gradle@v4
+      uses: gradle/actions/setup-gradle@v6
 
     - name: Build iOS Frameworks (Debug)
       if: steps.changed-files.outputs.changed == 'true'
