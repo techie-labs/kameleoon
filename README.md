@@ -5,8 +5,8 @@
 <p align="center">
   <a href="https://github.com/techie-labs/Kameleoon/actions"><img src="https://img.shields.io/github/actions/workflow/status/techie-labs/Kameleoon/build.yml?branch=main&logo=github&style=flat-square" alt="Build Status"></a>
   <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square" alt="License"></a>
-  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/Kotlin-2.1.0-7F52FF.svg?style=flat-square&logo=kotlin" alt="Kotlin"></a>
-  <a href="https://www.jetbrains.com/lp/compose-multiplatform/"><img src="https://img.shields.io/badge/Compose%20Multiplatform-1.7.0-4285F4.svg?style=flat-square&logo=jetpackcompose" alt="Compose Multiplatform"></a>
+  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/Kotlin-2.3.0-7F52FF.svg?style=flat-square&logo=kotlin" alt="Kotlin"></a>
+  <a href="https://www.jetbrains.com/lp/compose-multiplatform/"><img src="https://img.shields.io/badge/Compose%20Multiplatform-1.10.0-4285F4.svg?style=flat-square&logo=jetpackcompose" alt="Compose Multiplatform"></a>
 </p>
 
 # Kameleoon 🦎
@@ -23,8 +23,9 @@ Stop wasting time on build configuration. Kameleoon provides a pre-configured en
 *   **⚡️ Zero Configuration Setup**: Start writing code immediately, not Gradle scripts.
 *   **📱 Cross-Platform Ready**: Targets Android, iOS, Desktop, and Web (Wasm) out of the box.
 *   **📦 Maven Central Publishing**: Automated publishing workflow using `vanniktech-maven-publish`.
-*   **Ui Kit Ready**: Pre-configured with Jetpack Compose / Compose Multiplatform for sharing UI.
+*   **🏢 UI Kit Ready**: Pre-configured with Jetpack Compose / Compose Multiplatform for sharing UI.
 *   **🛡️ Quality First**: Integrated Spotless (Ktlint), Detekt, and Binary Compatibility Validator.
+*   **🚀 Efficient CI/CD**: Optimized multi-stage pipeline with path filtering and macOS runner support.
 
 ## 📂 Project Structure
 
@@ -108,15 +109,15 @@ For local testing or manual publishing:
 1.  Configure your Sonatype (OSSRH) credentials in `local.properties` or environment variables.
 2.  Run the publish task:
     ```shell
-    ./gradlew publishToMavenCentral --no-configuration-cache
+    ./gradlew publishToMavenCentral --no-configuration-cache -PVERSION_NAME=1.0.1
     ```
 
 ### 2. Automated Publishing (GitHub Actions)
 The template includes a robust GitHub Action ([`publish.yml`](.github/workflows/publish.yml)) that is **tag-driven**. 
 
 #### How it works:
-*   Creating a **GitHub Release** with a tag like `v1.0.0-beta01` triggers the workflow.
-*   The workflow automatically strips the `v` prefix and publishes version `1.0.0-beta01` to Maven Central.
+*   Creating a **GitHub Release** with a tag like `v1.0.1` triggers the workflow.
+*   The workflow automatically strips the `v` prefix and publishes version `1.0.1` to Maven Central.
 *   This ensures your Git tags follow SemVer (with `v`) while your Maven artifacts follow Maven conventions (no `v`).
 
 #### Required GitHub Secrets:
